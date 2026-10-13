@@ -47,6 +47,20 @@ jobs:
       - run: cargo llvm-cov --workspace --json --summary-only --output-path cov.json
       - run: bash scripts/check_coverage.sh cov.json
 
+  python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: py
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv python install 3.12
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run mypy data_platform
+      - run: uv run pytest
+
   deny:
     runs-on: ubuntu-latest
     steps:

@@ -16,6 +16,7 @@ dev = [
     "pytest>=8",
     "ruff>=0.8",
     "mypy>=1.13",
+    "pandas-stubs>=2.2",
 ]
 
 [tool.ruff]
@@ -24,6 +25,10 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
 
 [tool.mypy]
 python_version = "3.12"

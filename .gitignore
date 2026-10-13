@@ -7,6 +7,9 @@
 # Python（M1 data-platform 起用）
 __pycache__/
 .venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
 # 前端（M4 web 起用）
 node_modules/
