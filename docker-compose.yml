@@ -1,0 +1,20 @@
+# M1-D0：单机 ClickHouse（开发/单机生产定位，ARCHITECTURE §3）
+# 端口只绑 127.0.0.1；数据落命名卷；初始化 SQL 见 scripts/clickhouse/init.sql
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: qinfra-clickhouse
+    ports:
+      - "127.0.0.1:8123:8123"   # HTTP
+      - "127.0.0.1:9000:9000"   # native
+    volumes:
+      - ch-data:/var/lib/clickhouse
+      - ./scripts/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped
+
+volumes:
+  ch-data:

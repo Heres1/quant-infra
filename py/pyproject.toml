@@ -1,0 +1,41 @@
+[project]
+name = "quant-infra-py"
+version = "0.1.0"
+description = "quant-infra 数据平台与策略 SDK（Python 侧）"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "akshare>=1.16",
+    "pandas>=2.2",
+    "clickhouse-connect>=0.7",
+    "httpx>=0.27",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+# EN-09：sdk 侧 strict；data-platform 渐进收紧（当前默认非 strict，逐步加 decorator）
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = "sdk.*"
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["akshare.*", "clickhouse_connect.*"]
+ignore_missing_imports = true
