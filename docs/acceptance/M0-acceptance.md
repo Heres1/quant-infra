@@ -14,7 +14,7 @@
 | gitleaks 全历史扫描 | ✅ CI 绿（首跑失败为根提交扫描区间问题，非泄密；本地全历史复扫 0 泄漏） | run #2 job `gitleaks` |
 | 约束扫描器（AC-01/02/08、PR-04） | ✅ CI 绿 + 本地红测通过（注入违规全部抓出） | run #2 job `constraints` |
 | #![forbid(unsafe_code)]（EN-02） | ✅ workspace lints 全 crate 生效 | 根 Cargo.toml |
-| main 分支保护（EN-01/PR-08） | ✅ require PR + 7 个必过 check + require up-to-date + 禁 force push/delete + 取消 approvals（单人补偿，§4） | GitHub Settings → Branches |
+| main 分支保护（EN-01/PR-08） | ✅ require PR + 7 个必过 check + require up-to-date + 禁 force push/delete + 取消 approvals（单人补偿，§4）。注：2026-10-13 还债日后必过检查增至 8 个（+python） | GitHub Settings → Branches |
 | 仓库公开 + 工具链锁定 1.90.0 | ✅ | github.com/Heres1/quant-infra · rust-toolchain.toml |
 
 CI 证据：`https://github.com/Heres1/quant-infra/actions/runs/38353247313`（7/7 绿）

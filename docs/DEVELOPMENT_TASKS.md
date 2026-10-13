@@ -32,7 +32,7 @@ todo → in_progress → 读规格(MODULE_DESIGNS/ARCHITECTURE) → 编码
 | T0.2 | T1 强制基础设施 | CI×7 job、扫描器、覆盖率门槛、deny、pre-commit | 本地绿 + 扫描器红测通过；coverage/deny/gitleaks 待 T0.5 首跑验证 | 2h | AI | ✅ done 2026-10-13 |
 | T0.3 | core-types 领域类型 | money/price/qty/instrument/rounding/fees/model 七模块 + lib 出口 | 30/30 测试绿（TC-C1..C7 全过）、clippy -D warnings 零警告、约束扫描过；覆盖率待 T0.5 CI 首跑确认 | ~15h | AI | ✅ done 2026-10-13 |
 | T0.4 | time-core 最小版 | EngineTime/Clock trait/SessionPhase 枚举（10 变体含文档） | 2/2 测试绿 + AC-08 扫描过 | 2h | AI | ✅ done 2026-10-13 |
-| T0.5 | GitHub 上线 | 公开仓库、main 分支保护(7 checks)、hooksPath、toolchain 固定 1.90.0、CI 首跑修复 | CI 全绿含 coverage/deny/gitleaks | 1-2h | 用户+AI | ✅ done 2026-10-13：github.com/Heres1/quant-infra 公开；CI run#2 7/7 绿；分支保护生效；deny 修复（license 字段）、gitleaks 根提交区间问题自愈 |
+| T0.5 | GitHub 上线 | 公开仓库、main 分支保护(创建时 7 checks，现为 8)、hooksPath、toolchain 固定 1.90.0、CI 首跑修复 | CI 全绿含 coverage/deny/gitleaks | 1-2h | 用户+AI | ✅ done 2026-10-13：github.com/Heres1/quant-infra 公开；CI run#2 7/7 绿；分支保护生效；deny 修复（license 字段）、gitleaks 根提交区间问题自愈 |
 | T0.6 | M0 验收演示 | 演示记录（截图/数据） | CONSTRAINTS §6 全项 + DEVELOPMENT_PLAN §9 M0 场景 | 1h | 用户+AI | ✅ done 2026-10-13：M0 正式关闭（答辩按用户指示免除，PR-03 二次修订）；记录 docs/acceptance/M0-acceptance.md + M0-TEST-REPORT.md |
 
 **M0 出口准则**：CONSTRAINTS §6 T1 基础设施清单逐项绿 + 演示记录归档（PR-05）。
@@ -91,6 +91,6 @@ M2 **快照级事件回测引擎**（事件模型按 tick/快照设计，bar 为
 | #5 文档漂移 | ✅ 已还 | ARCHITECTURE §5.3 补网关适配器矩阵与快照级事件模型；MODULE_DESIGNS §9 补复权感知质量门规则 |
 | #1 分钟线 | 方案定稿，下会话执行 | 新表 `bar_5m`；源=akshare `stock_zh_a_hist_min_em`（period="5"；**东财 1 分钟仅近 5 日，属源限制**）；标的=沪深300 成分（`index_stock_cons_csindex("000300")`）；轻量 `gate_minute`（OHLC/正数/时序，无跳变检查——午休开盘跳空正常） |
 | #3 退市股（幸存者偏差） | 方案定稿，下会话执行 | 元数据先行：`stock_info_sh_delist`/`stock_info_sz_delist` → instrument.status=Delisted（点时股票池基础）；价格数据探测 EM 对退市股的支持度，不足则补 baostock 源 |
-| #6 python job 分支保护 | 本轮浏览器补勾选 | — |
+| #6 python job 分支保护 | ✅ 已还 | main 保护规则必过检查 7→8（+python），2026-10-13 |
 | #7 单源无交叉校验 | 方案（D3/D4） | 兜底源上线后质量门加跨源字段级表决：同一 symbol 同一分钟两源价差 >0.1% 告警并双记 |
 | #8 ingest 编排测试 / hfq / 观测 | 方案（分摊） | ingest 重试/断点用注入式 source mock 测（D4）；hfq 三份存等动态复权需求出现再加（backlog）；数据新鲜度 lag 指标提前到 D6 实现 |
