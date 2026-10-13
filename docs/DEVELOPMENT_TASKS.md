@@ -59,7 +59,7 @@ todo → in_progress → 读规格(MODULE_DESIGNS/ARCHITECTURE) → 编码
 | ID | 任务 | 要点 | 验收 | 预估 | 负责 | 状态 |
 |---|---|---|---|---|---|---|
 | D0 | 存储就绪 | docker-compose：ClickHouse 单机；建库表（snapshot/bar 双表 + source/capture_ts/exchange_ts 双时间戳字段） | 一条命令起库，SQL 查询通 | 2h | AI | ✅ done 2026-10-13：docker hub 在本网络不可达，本地改为 brew 官方单二进制 + `scripts/ch-start.sh`（compose 保留给服务器部署）；bar_1d/snapshot_l1 建表完成 |
-| D1 | Python 环境 + 一次性历史导入 | uv 环境；akshare 拉全市场日线+分钟线（一次性）→ 质量门 → 入库；茅台冒烟脚本 | 全市场历史入库，TC 注入测试过 | 6h | AI | ⏳ |
+| D1 | Python 环境 + 一次性历史导入 | uv 环境；akshare 拉全市场日线+分钟线（一次性）→ 质量门 → 入库；茅台冒烟脚本 | 全市场历史入库，TC 注入测试过 | 6h | AI | 🔄 大头完成 2026-10-13：方案 C 双份存（none+qfq 各 10,722,928 行，5257 只，2015→今），隔离 317 只带载荷；剩余：沪深300 分钟线（东财 1 分钟仅近 5 日，5 分钟可回溯数年——源限制） |
 | D2 | 行情订阅网关 v1（QMT） | `gateway-qmt`：Windows 端采集服务（xtquant 订阅推送 → 双时间戳 → 投递数据层）；Mac 端接收落库 | 盘中实采 ≥1 交易日全量快照落库 | 8h | AI | ⏳ 等 QMT 开通 |
 | D3 | 兜底采集适配器 | `gateway-free-http`：腾讯批量轮询（主兜底）+ 东财全市场快照（名单/兜底），同一 trait 可插拔 | 兜底源盘中独立采集 1 日通过质量门 | 4h | AI | ⏳ |
 | D4 | 质量门 v2（快照流） | 8 类注入测试适配快照；乱序/缺口检测（按 exchange_ts）；跨源交叉校验 | 注入全拦 + 缺口告警 | 4h | AI | ⏳ |
