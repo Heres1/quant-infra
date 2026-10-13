@@ -1,0 +1,26 @@
+[workspace]
+resolver = "2"
+members = ["crates/core-types", "crates/time-core"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+[workspace.lints.rust]
+# EN-02：全 workspace 禁止 unsafe。forbid 与 deny 的区别：
+# forbid 下任何子模块都无法用 allow 重新打开——约束不可协商。
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+# EN-03：引擎路径禁 unwrap/expect/panic（测试模块内用 #![allow(...)] 局部豁免，
+# 豁免是显式行为，code review 时可见）。
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+
+# 公共依赖统一在 [workspace.dependencies] 登记，crate 内以 `dep = { workspace = true }` 引用。
+# 按里程碑按需添加（EN-07：新增依赖需在 PR 写明理由）。
+
+# 账本系统：release 保留溢出检查——性能换正确性，交易系统的标准取舍
+[profile.release]
+overflow-checks = true

@@ -1,0 +1,14 @@
+/target
+/lcov.info
+/cov.json
+*.profraw
+.DS_Store
+
+# Python（M1 data-platform 起用）
+__pycache__/
+.venv/
+
+# 前端（M4 web 起用）
+node_modules/
+dist/
+# 注意：全局 gitignore 可能屏蔽 package.json，届时在本文件追加 `!package.json` 重新纳入

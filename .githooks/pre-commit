@@ -1,0 +1,6 @@
+#!/bin/sh
+# 本地快速闸门（EN-01/PR-08）。完整检查以 CI 为准，本钩子不可替代 CI。
+# 启用：git config core.hooksPath .githooks（M0.5 步骤之一）
+set -e
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings

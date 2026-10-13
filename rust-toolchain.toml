@@ -1,0 +1,4 @@
+[toolchain]
+channel = "stable"
+# TODO(M0.5)：CI 首次跑绿后，将 channel 固定为 `rustc --version` 的具体版本（当前 1.90.0），
+# 锁定本地与 CI 编译器一致（可复现构建，生产级做法）。
