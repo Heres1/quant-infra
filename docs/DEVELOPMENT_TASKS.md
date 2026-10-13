@@ -33,7 +33,7 @@ todo → in_progress → 读规格(MODULE_DESIGNS/ARCHITECTURE) → 编码
 | T0.3 | core-types 领域类型 | money/price/qty/instrument/rounding/fees/model 七模块 + lib 出口 | 30/30 测试绿（TC-C1..C7 全过）、clippy -D warnings 零警告、约束扫描过；覆盖率待 T0.5 CI 首跑确认 | ~15h | AI | ✅ done 2026-10-13 |
 | T0.4 | time-core 最小版 | EngineTime/Clock trait/SessionPhase 枚举（10 变体含文档） | 2/2 测试绿 + AC-08 扫描过 | 2h | AI | ✅ done 2026-10-13 |
 | T0.5 | GitHub 上线 | 公开仓库、main 分支保护(7 checks)、hooksPath、toolchain 固定 1.90.0、CI 首跑修复 | CI 全绿含 coverage/deny/gitleaks | 1-2h | 用户+AI | ✅ done 2026-10-13：github.com/Heres1/quant-infra 公开；CI run#2 7/7 绿；分支保护生效；deny 修复（license 字段）、gitleaks 根提交区间问题自愈 |
-| T0.6 | M0 验收演示 | 演示记录（截图/数据） | CONSTRAINTS §6 全项 + DEVELOPMENT_PLAN §9 M0 场景 | 1h | 用户+AI | ✅ 记录完成 docs/acceptance/M0-acceptance.md；待用户 3 问答辩（PR-03）后正式关闭 M0 |
+| T0.6 | M0 验收演示 | 演示记录（截图/数据） | CONSTRAINTS §6 全项 + DEVELOPMENT_PLAN §9 M0 场景 | 1h | 用户+AI | ✅ done 2026-10-13：M0 正式关闭（答辩按用户指示免除，PR-03 二次修订）；记录 docs/acceptance/M0-acceptance.md + M0-TEST-REPORT.md |
 
 **M0 出口准则**：CONSTRAINTS §6 T1 基础设施清单逐项绿 + 演示记录归档（PR-05）。
 

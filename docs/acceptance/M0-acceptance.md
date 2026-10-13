@@ -27,4 +27,4 @@ CI 证据：`https://github.com/Heres1/quant-infra/actions/runs/38353247313`（7
 
 ## 出口结论
 
-M0 出口准则满足（CONSTRAINTS §6 全项绿 + 本记录留档）。待办：用户完成 3 个架构答辩问题（PR-03 修订版）后 M0 正式关闭，进入 M1。
+M0 出口准则满足（CONSTRAINTS §6 全项绿 + 本记录留档）。答辩环节按用户 2026-10-13 指示免除（PR-03 二次修订），**M0 正式关闭**。详细测试数据见 `M0-TEST-REPORT.md`。

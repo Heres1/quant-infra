@@ -20,9 +20,10 @@ TOTAL_MIN=70
 fail=0
 
 # 某前缀下的聚合行覆盖率（covered*100/count）；无数据或 0 行时输出空 → 调用方跳过
+# 注意用 contains 而非 startswith：llvm-cov 在部分环境输出绝对路径
 crate_pct() {
   jq -r --arg p "$1" \
-    '[.data[0].files[] | select(.filename | startswith($p)) | .summary.lines]
+    '[.data[0].files[] | select(.filename | contains($p)) | .summary.lines]
      | if length == 0 or (map(.count) | add) == 0 then empty
        else (map(.covered) | add) * 100 / (map(.count) | add) end' "$file"
 }
