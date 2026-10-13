@@ -5,6 +5,7 @@ members = ["crates/core-types", "crates/time-core"]
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 
 [workspace.lints.rust]
 # EN-02：全 workspace 禁止 unsafe。forbid 与 deny 的区别：
