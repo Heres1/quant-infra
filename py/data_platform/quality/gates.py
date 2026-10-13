@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from data_platform.config import MAX_DAILY_PCT
+from data_platform.config import MAX_DAILY_PCT, NEW_LISTING_GRACE_ROWS
 
 
 @dataclass
@@ -61,9 +61,13 @@ def _check_block(block: pd.DataFrame, adjust: str, today: dt.date) -> list[GateV
         v.append(GateViolation(f"{tag}future_dates", f"max={block['trade_date'].max()}"))
 
     if check_jump and len(block) > 1:
-        pct = block.sort_values("trade_date")["close"].pct_change().abs().max()
-        if pct and pct > MAX_DAILY_PCT:
-            v.append(GateViolation(f"{tag}suspicious_jump", f"max_abs_pct_change={pct:.4f}"))
+        pct = block.sort_values("trade_date")["close"].pct_change().abs()
+        # 上市初期无涨跌幅限制：豁免宽限窗口内的真实跳变（D4 换主档上市日期后精确化）
+        if len(pct) > NEW_LISTING_GRACE_ROWS:
+            pct = pct.iloc[NEW_LISTING_GRACE_ROWS:]
+        max_pct = pct.max()
+        if max_pct and max_pct > MAX_DAILY_PCT:
+            v.append(GateViolation(f"{tag}suspicious_jump", f"max_abs_pct_change={max_pct:.4f}"))
 
     return v
 

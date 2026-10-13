@@ -81,3 +81,16 @@ M2 **快照级事件回测引擎**（事件模型按 tick/快照设计，bar 为
 | 2026-10-13 | 涨跌停取整规则由"向内取整"修正为"四舍五入至 tick"（RISK_CONTROL R2、MODULE_DESIGNS §1 同步修正） | 写 TEST_PLAN 具体用例时核对交易所规则发现规格错误 | T0.3d |
 | 2026-10-13 | 开发模式变更：领域代码改由 AI 全权开发（用户明确委托"完全交给你来做"）；CONSTRAINTS PR-03 同步修订 | 用户全职入职后时间稀缺，明确指令 | 全部里程碑 |
 | 2026-10-13 | M1 重排：行情改为 QMT/miniQMT 订阅优先（实时落库+回放），历史数据 akshare 一次性导入；M2 引擎改快照级事件模型 | 用户决策（低延迟行情优先）；免费快照做兜底适配器对冲 QMT 政策风险 | M1/M2 |
+
+### 5.1 欠账偿还（2026-10-13 还债日，对应 PHASE-REPORT §5）
+
+| 欠账 | 状态 | 结果 / 方案 |
+|---|---|---|
+| #2 隔离整票粒度（317 只 none 数据丢失） | ✅ 已还 | `replay_quarantine`：重放改为**从源重新拉取**（载荷 60KB 截断不可靠的教训，截断上限提至 2MB）；质量门加上市初期宽限窗口（前 10 根 bar 豁免跳变）。回收 81 只；236 只中段 `[qfq]suspicious_jump` 留 D4（需主档+跨源判真伪），载荷留存 |
+| #4 每日增量未自动化 | ✅ 已还 | `scripts/daily_update.sh` + launchd `com.quantinfra.dailyupdate`（工作日 17:30，近 7 日窗口幂等覆盖）；节假日空数据噪声暂由隔离区吸收，D6 日历门控后移除 |
+| #5 文档漂移 | ✅ 已还 | ARCHITECTURE §5.3 补网关适配器矩阵与快照级事件模型；MODULE_DESIGNS §9 补复权感知质量门规则 |
+| #1 分钟线 | 方案定稿，下会话执行 | 新表 `bar_5m`；源=akshare `stock_zh_a_hist_min_em`（period="5"；**东财 1 分钟仅近 5 日，属源限制**）；标的=沪深300 成分（`index_stock_cons_csindex("000300")`）；轻量 `gate_minute`（OHLC/正数/时序，无跳变检查——午休开盘跳空正常） |
+| #3 退市股（幸存者偏差） | 方案定稿，下会话执行 | 元数据先行：`stock_info_sh_delist`/`stock_info_sz_delist` → instrument.status=Delisted（点时股票池基础）；价格数据探测 EM 对退市股的支持度，不足则补 baostock 源 |
+| #6 python job 分支保护 | 本轮浏览器补勾选 | — |
+| #7 单源无交叉校验 | 方案（D3/D4） | 兜底源上线后质量门加跨源字段级表决：同一 symbol 同一分钟两源价差 >0.1% 告警并双记 |
+| #8 ingest 编排测试 / hfq / 观测 | 方案（分摊） | ingest 重试/断点用注入式 source mock 测（D4）；hfq 三份存等动态复权需求出现再加（backlog）；数据新鲜度 lag 指标提前到 D6 实现 |

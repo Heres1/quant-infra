@@ -88,10 +88,19 @@ def test_inject_future_dates() -> None:
 
 def test_inject_suspicious_jump() -> None:
     # 跳变检查只作用于 qfq（none 豁免，见 test_none_adjust_exempt_from_jump）
-    df = good_df(adjust="qfq")
-    df.loc[3, "close"] = df.loc[2, "close"] * 1.5  # +50%，超北交所 ±30% 上限
+    # 且只在宽限窗口（前 10 根 bar，上市初期无涨跌幅）之外生效
+    df = good_df(rows=15, adjust="qfq")
+    df.loc[12, "close"] = df.loc[11, "close"] * 1.5  # +50%，超北交所 ±30% 上限
     r = gate_daily(df)
     assert not r.ok and any(v.reason.endswith("suspicious_jump") for v in r.violations)
+
+
+def test_new_listing_grace_window_exempt() -> None:
+    """次新股上市初期无涨跌幅限制：宽限窗口内的真实跳变放行。"""
+    df = good_df(rows=15, adjust="qfq")
+    df.loc[3, "close"] = df.loc[2, "close"] * 2.0  # +100%，但发生在前 10 根内
+    df.loc[3, "high"] = df.loc[3, "close"] * 1.001
+    assert gate_daily(df).ok
 
 
 def test_jump_within_limit_passes() -> None:

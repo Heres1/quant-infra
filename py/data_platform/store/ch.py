@@ -49,9 +49,10 @@ def insert_quarantine(
     detail: str,
     payload: str,
 ) -> None:
+    # payload 上限 2MB（此前 60KB 截断曾把 JSON 切成非法串，导致隔离区不可重放）
     client.insert(
         "qinfra.quarantine_bar_1d",
-        [[symbol, reason, detail[:2000], payload[:60000], _now()]],
+        [[symbol, reason, detail[:2000], payload[:2_000_000], _now()]],
         column_names=["symbol", "reason", "detail", "payload", "ingested_at"],
     )
 

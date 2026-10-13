@@ -116,6 +116,7 @@ trait ExecutionGateway {
 - **不变量 INV-G1**：风控 R2 静态校验的规则数据（涨跌停类型/申报单位/tick）来自 `Instrument`，网关 capabilities 只能收缩不能放宽检查。
 - **不变量 INV-G2**：对网关的每个 submit 都带全局唯一 `client_order_id`（UUIDv7，时间有序），网关层幂等去重；重复提交返回同一 Ack。
 - `gateway-sim`：回测与纸面交易共用。撮合规则显式建模（涨跌停一字板不成交、按 bar 成交量参与率上限默认 10%、集合竞价以竞价价格成交、滑点模型可配）——撮合可信度边界在 MODULE_DESIGNS §gateway-sim 列全。
+- **网关适配器矩阵（2026-10-13 M1 重排后）**：`gateway-qmt`（主源，Windows 端 xtquant 订阅服务，经内部接口投递）/ `gateway-free-http`（腾讯批量轮询 + 东财全市场快照，政策兜底）/ `gateway-sim`。通道政策变化只影响延迟与源选择，不影响可用性。行情事件模型按**快照级**设计（M2 引擎 tick/快照 first，bar 为聚合视图）；实时落库双时间戳（exchange_ts 事件时间 / capture_ts 处理时间）。
 
 ### 5.4 订单状态机（oms）
 
