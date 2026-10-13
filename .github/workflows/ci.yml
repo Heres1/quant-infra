@@ -1,5 +1,7 @@
 # T1 强制基础设施（docs/CONSTRAINTS.md §6）——CI 流水线
 # 全部 job 通过才能合入 main（EN-01，配合分支保护）。
+# 工具链由根目录 rust-toolchain.toml 锁定（1.90.0 + clippy/rustfmt/llvm-tools），
+# GitHub runner 的 rustup 读取该文件自动安装，无需 action 指定。
 # Python 侧 job（ruff/mypy/pytest，EN-09/10）在 M1 加入。
 
 name: ci
@@ -14,18 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
       - run: cargo fmt --all -- --check
 
   clippy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy --workspace --all-targets -- -D warnings
 
@@ -33,7 +29,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --workspace
 
@@ -47,9 +42,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@cargo-llvm-cov
       - run: cargo llvm-cov --workspace --json --summary-only --output-path cov.json

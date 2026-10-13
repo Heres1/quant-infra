@@ -1,4 +1,5 @@
 [toolchain]
-channel = "stable"
-# TODO(M0.5)：CI 首次跑绿后，将 channel 固定为 `rustc --version` 的具体版本（当前 1.90.0），
-# 锁定本地与 CI 编译器一致（可复现构建，生产级做法）。
+# 生产级做法：锁定精确版本，本地与 CI 编译器一致（T0.5）
+# 依赖本文件的组件随 rustup 自动安装，CI 无需单独指定 toolchain
+channel = "1.90.0"
+components = ["clippy", "rustfmt", "llvm-tools-preview"]
