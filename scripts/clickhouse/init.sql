@@ -4,6 +4,31 @@
 
 CREATE DATABASE IF NOT EXISTS qinfra;
 
+-- 证券主档（板块由代码前缀推断，status 以交易所披露为准逐步维护）
+CREATE TABLE IF NOT EXISTS qinfra.instrument
+(
+    symbol     String,
+    name       String,
+    board      LowCardinality(String),
+    asset_type LowCardinality(String) DEFAULT 'Stock',
+    status     LowCardinality(String) DEFAULT 'Listed',
+    updated_at DateTime64(3, 'Asia/Shanghai')
+)
+ENGINE = ReplacingMergeTree(updated_at)
+ORDER BY symbol;
+
+-- 隔离区（INV-D1：未过质量门的数据只进这里，带原因与原始载荷）
+CREATE TABLE IF NOT EXISTS qinfra.quarantine_bar_1d
+(
+    symbol      String,
+    reason      LowCardinality(String),
+    detail      String,
+    payload     String,
+    ingested_at DateTime64(3, 'Asia/Shanghai')
+)
+ENGINE = MergeTree
+ORDER BY ingested_at;
+
 -- K 线表：一次性历史导入 + 实时快照聚合产物共用
 CREATE TABLE IF NOT EXISTS qinfra.bar_1d
 (

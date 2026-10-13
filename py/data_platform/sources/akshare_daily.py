@@ -40,14 +40,24 @@ def fetch_stock_list() -> pd.DataFrame:
     return out[["symbol", "name", "board"]]
 
 
+# 内部规范标签 → akshare 参数（akshare 不复权是空字符串，"none" 会 KeyError）
+_AK_ADJUST = {"none": "", "qfq": "qfq", "hfq": "hfq"}
+
+
 def fetch_daily(symbol: str, start: str, end: str, adjust: str = "qfq") -> pd.DataFrame:
     """单只股票日线历史，规范化为存储 schema（手→股，日期→date）。
+
+    adjust 使用内部标签：none（不复权）/ qfq（前复权）/ hfq（后复权）。
 
     Raises:
         ValueError: 返回为空或缺少必需列时（调用方计入隔离区）。
     """
     raw: pd.DataFrame = ak.stock_zh_a_hist(
-        symbol=symbol, period="daily", start_date=start, end_date=end, adjust=adjust
+        symbol=symbol,
+        period="daily",
+        start_date=start,
+        end_date=end,
+        adjust=_AK_ADJUST[adjust],
     )
     if raw is None or raw.empty:
         raise ValueError(f"empty daily history for {symbol}")

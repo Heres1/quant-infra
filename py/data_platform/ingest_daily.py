@@ -38,22 +38,30 @@ def save_state(done: set[str]) -> None:
     STATE_PATH.write_text(json.dumps({"done": sorted(done)}))
 
 
-def fetch_with_retry(symbol: str, start: str, end: str, attempts: int = 3) -> pd.DataFrame:
+def fetch_with_retry(
+    symbol: str, start: str, end: str, adjust: str, attempts: int = 3
+) -> pd.DataFrame:
     last_exc: Exception | None = None
     for i in range(attempts):
         try:
-            return fetch_daily(symbol, start, end)
+            return fetch_daily(symbol, start, end, adjust=adjust)
         except Exception as exc:  # noqa: BLE001 —— 源站异常形态不可枚举，重试后仍失败则隔离
             last_exc = exc
             time.sleep(1 + 2 * i)
     raise RuntimeError(f"fetch failed after {attempts} attempts: {last_exc}") from last_exc
 
 
+def fetch_history(symbol: str, start: str, end: str) -> pd.DataFrame:
+    """方案 C：每票同时取原始价（none）与前复权（qfq）两套，拼接后统一过门。"""
+    frames = [fetch_with_retry(symbol, start, end, adjust) for adjust in ("none", "qfq")]
+    return pd.concat(frames, ignore_index=True)
+
+
 def process_one(symbol: str, start: str, end: str) -> tuple[str, str]:
     """返回 (symbol, ok|quarantine:原因)。客户端在线程内自取（thread-local，非线程安全）。"""
     client = ch.get_client()
     try:
-        df = fetch_with_retry(symbol, start, end)
+        df = fetch_history(symbol, start, end)
     except Exception as exc:  # noqa: BLE001
         ch.insert_quarantine(client, symbol, "fetch_error", str(exc), "")
         return symbol, "quarantine:fetch_error"
