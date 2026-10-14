@@ -74,3 +74,34 @@ CREATE TABLE IF NOT EXISTS qinfra.snapshot_l1
 )
 ENGINE = ReplacingMergeTree(capture_ts)
 ORDER BY (symbol, exchange_ts, source);
+
+-- 5 分钟 K 线：沪深300 成分一次性导入（东财接口约回溯 7 周；深度历史走 baostock，backlog）
+-- ts 为 bar 结束时刻（东财口径：09:35 = 09:30-09:35）
+CREATE TABLE IF NOT EXISTS qinfra.bar_5m
+(
+    symbol      String,
+    ts          DateTime64(3, 'Asia/Shanghai'),
+    open        Float64,
+    high        Float64,
+    low         Float64,
+    close       Float64,
+    volume      UInt64,
+    amount      Float64,
+    adjust      LowCardinality(String),
+    source      LowCardinality(String),
+    ingested_at DateTime64(3, 'Asia/Shanghai')
+)
+ENGINE = ReplacingMergeTree(ingested_at)
+ORDER BY (symbol, ts, adjust);
+
+-- 分钟线隔离区
+CREATE TABLE IF NOT EXISTS qinfra.quarantine_bar_5m
+(
+    symbol      String,
+    reason      LowCardinality(String),
+    detail      String,
+    payload     String,
+    ingested_at DateTime64(3, 'Asia/Shanghai')
+)
+ENGINE = MergeTree
+ORDER BY ingested_at;

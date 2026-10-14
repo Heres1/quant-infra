@@ -80,6 +80,16 @@ def insert_quarantine_minute(
     )
 
 
+def insert_snapshot(client: clickhouse_connect.driver.Client, df: pd.DataFrame) -> None:
+    out = df.copy()
+    out["ingested_at"] = _now()
+    out["volume"] = out["volume"].astype("int64")
+    # naive 时间戳会被 clickhouse-connect 当 UTC（+8h 坑，bar_5m 实测），统一显式本地化
+    for col in ("exchange_ts", "capture_ts"):
+        out[col] = out[col].dt.tz_localize("Asia/Shanghai")
+    client.insert_df("qinfra.snapshot_l1", out)
+
+
 def upsert_instruments(
     client: clickhouse_connect.driver.Client, df: pd.DataFrame, status: str = "Listed"
 ) -> None:
