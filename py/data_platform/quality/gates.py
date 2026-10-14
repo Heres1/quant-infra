@@ -72,6 +72,48 @@ def _check_block(block: pd.DataFrame, adjust: str, today: dt.date) -> list[GateV
     return v
 
 
+def gate_minute(df: pd.DataFrame, now: pd.Timestamp | None = None) -> GateResult:
+    """分钟线批量质量门（轻量）：schema/空值/OHLC/正数/重复/时序/未来时间。
+
+    与日线的差异：不做跳变检查——午休（11:30→13:00）与隔夜开盘的正常跳空
+    在分钟粒度占比过高，逐 bar 跳变过滤留给引擎侧（复权 qfq 已消除除权缺口）。
+    """
+    v: list[GateViolation] = []
+    now = now or pd.Timestamp.now(tz="Asia/Shanghai")
+
+    required = {"symbol", "ts", "open", "high", "low", "close", "volume", "amount"}
+    missing = required - set(df.columns)
+    if missing:
+        return GateResult(False, [GateViolation("schema_missing", f"missing={sorted(missing)}")])
+    if df.empty:
+        v.append(GateViolation("empty", "no rows"))
+
+    null_counts = df[list(required)].isna().sum()
+    if (null_counts > 0).any():
+        v.append(GateViolation("null_values", null_counts[null_counts > 0].to_dict().__str__()))
+
+    if (df["low"] > df["high"]).any():
+        v.append(GateViolation("ohlc_low_gt_high", "low > high present"))
+    if ((df["open"] > df["high"]) | (df["open"] < df["low"])).any():
+        v.append(GateViolation("ohlc_open_out_of_range", "open outside [low, high]"))
+    if ((df["close"] > df["high"]) | (df["close"] < df["low"])).any():
+        v.append(GateViolation("ohlc_close_out_of_range", "close outside [low, high]"))
+    if (df[["open", "high", "low", "close"]] <= 0).any().any():
+        v.append(GateViolation("non_positive_price", "price <= 0 present"))
+    if (df["volume"] < 0).any():
+        v.append(GateViolation("negative_volume", "volume < 0 present"))
+    if df["ts"].duplicated().any():
+        v.append(GateViolation("duplicate_ts", "ts duplicated"))
+    if not df["ts"].is_monotonic_increasing:
+        v.append(GateViolation("ts_unordered", "ts not ascending"))
+
+    ts_naive = df["ts"].dt.tz_localize(None) if df["ts"].dt.tz is not None else df["ts"]
+    if (ts_naive > now.to_pydatetime().replace(tzinfo=None)).any():
+        v.append(GateViolation("future_ts", f"max={ts_naive.max()}"))
+
+    return GateResult(not v, v)
+
+
 def gate_daily(df: pd.DataFrame, today: dt.date | None = None) -> GateResult:
     """日线批量质量门：按 adjust 分组执行复权感知规则。"""
     v: list[GateViolation] = []

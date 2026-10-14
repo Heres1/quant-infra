@@ -18,7 +18,7 @@ import pandas as pd
 
 from data_platform import config
 from data_platform.quality.gates import gate_daily
-from data_platform.sources.akshare_daily import fetch_daily, fetch_stock_list
+from data_platform.sources.akshare_daily import fetch_daily, fetch_delisted, fetch_stock_list
 from data_platform.store import ch
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -94,6 +94,13 @@ def main() -> None:
     stock_list = fetch_stock_list()
     ch.upsert_instruments(client, stock_list)
     log.info("stock list: %d instruments upserted", len(stock_list))
+
+    try:
+        delisted = fetch_delisted()
+        ch.upsert_instruments(client, delisted)
+        log.info("delisted instruments upserted: %d", len(delisted))
+    except Exception as exc:  # noqa: BLE001 —— 退市名单接口不可用不阻塞主导入
+        log.warning("delist list unavailable: %s", exc)
 
     done = set() if args.no_resume else load_state()
     symbols = [s for s in stock_list["symbol"] if s not in done]

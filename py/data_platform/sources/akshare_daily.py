@@ -44,6 +44,36 @@ def fetch_stock_list() -> pd.DataFrame:
 _AK_ADJUST = {"none": "", "qfq": "qfq", "hfq": "hfq"}
 
 
+def fetch_delisted() -> pd.DataFrame:
+    """沪深退市股名单（点时股票池元数据；价格数据东财不提供，backlog: baostock）。
+
+    按交易所独立容错：单个交易所接口超时只减少覆盖，不整体失败。
+    """
+    frames: list[pd.DataFrame] = []
+    errors: list[str] = []
+    try:
+        sh: pd.DataFrame = ak.stock_info_sh_delist()
+        frames.append(
+            sh.rename(columns={"公司代码": "symbol", "公司简称": "name"})[["symbol", "name"]]
+        )
+    except Exception as exc:  # noqa: BLE001 —— 单交易所失败容忍
+        errors.append(f"sh:{exc}")
+    try:
+        sz: pd.DataFrame = ak.stock_info_sz_delist()
+        frames.append(
+            sz.rename(columns={"证券代码": "symbol", "证券简称": "name"})[["symbol", "name"]]
+        )
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"sz:{exc}")
+    if not frames:
+        raise RuntimeError(f"delist list unavailable: {errors}")
+    df = pd.concat(frames, ignore_index=True)
+    df["symbol"] = df["symbol"].astype(str).str.zfill(6)
+    df["board"] = df["symbol"].map(infer_board)
+    df["status"] = "Delisted"
+    return df
+
+
 def fetch_daily(symbol: str, start: str, end: str, adjust: str = "qfq") -> pd.DataFrame:
     """单只股票日线历史，规范化为存储 schema（手→股，日期→date）。
 

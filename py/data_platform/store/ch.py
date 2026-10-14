@@ -57,9 +57,36 @@ def insert_quarantine(
     )
 
 
-def upsert_instruments(client: clickhouse_connect.driver.Client, df: pd.DataFrame) -> None:
+def insert_minute(client: clickhouse_connect.driver.Client, df: pd.DataFrame) -> None:
+    out = df.copy()
+    out["ingested_at"] = _now()
+    out["volume"] = out["volume"].astype("int64")
+    # clickhouse-connect 会把 naive 时间戳当 UTC 转换（实测 +8h 偏移），必须显式本地化
+    out["ts"] = out["ts"].dt.tz_localize("Asia/Shanghai")
+    client.insert_df("qinfra.bar_5m", out)
+
+
+def insert_quarantine_minute(
+    client: clickhouse_connect.driver.Client,
+    symbol: str,
+    reason: str,
+    detail: str,
+    payload: str,
+) -> None:
+    client.insert(
+        "qinfra.quarantine_bar_5m",
+        [[symbol, reason, detail[:2000], payload[:2_000_000], _now()]],
+        column_names=["symbol", "reason", "detail", "payload", "ingested_at"],
+    )
+
+
+def upsert_instruments(
+    client: clickhouse_connect.driver.Client, df: pd.DataFrame, status: str = "Listed"
+) -> None:
     out = df.copy()
     out["updated_at"] = _now()
+    if "status" not in out.columns:
+        out["status"] = status
     client.insert_df("qinfra.instrument", out)
 
 
