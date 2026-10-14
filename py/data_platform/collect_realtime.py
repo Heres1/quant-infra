@@ -26,6 +26,7 @@ from data_platform.store import ch
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("collect_realtime")
+logging.getLogger("httpx").setLevel(logging.WARNING)  # 每个请求一行 INFO，太吵
 
 
 def in_session(now: dt.datetime) -> bool:
